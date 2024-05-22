@@ -1,12 +1,13 @@
 defmodule Mix.Compilers.Phoenix.JsRoutes.RouterTest do
   use Phoenix.Router
-  get("/", PageController, :index, as: :page)
-  resources("/users", UserController)
 
   scope "/api" do
     get("/products", ProductController, :index)
     put("/orders/:id", OrderController, :update)
   end
+
+  get("/", PageController, :index, as: :page)
+  resources("/users", UserController)
 end
 
 defmodule Mix.Compilers.Phoenix.JsRoutesTest do
@@ -135,7 +136,7 @@ defmodule Mix.Compilers.Phoenix.JsRoutesTest do
       quote do
         defmodule Mix.Compilers.Phoenix.JsRoutes.RouterTest do
           # Always define a new function name to force the module's hash to change
-          def unquote(:"a_#{unique_id}")(), do: "test"
+          def unquote(:"a_#{TestHelper.unique_id()}")(), do: "test"
         end
       end
     )

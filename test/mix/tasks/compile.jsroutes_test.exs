@@ -1,13 +1,14 @@
 defmodule Mix.RouterTest do
   use Phoenix.Router
-  get("/", PageController, :index, as: :page)
-  resources("/users", UserController)
 
   scope "/api" do
     get("/products", ProductController, :index)
     put("/orders/:id", OrderController, :update)
     resources("/admin", AdminController)
   end
+
+  get("/", PageController, :index, as: :page)
+  resources("/users", UserController)
 end
 
 defmodule Mix.Tasks.Compile.JsroutesTest do
@@ -26,6 +27,7 @@ defmodule Mix.Tasks.Compile.JsroutesTest do
 
   test "generates a valid javascript module" do
     folder = "/tmp"
+
     run_with_env([output_folder: folder], fn ->
       Mix.Tasks.Compile.Jsroutes.run(["--router", "Mix.RouterTest"])
 

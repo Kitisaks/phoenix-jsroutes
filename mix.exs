@@ -21,9 +21,9 @@ defmodule PhoenixJsroutes.Mixfile do
   defp deps do
     [
       {:phoenix, ">= 1.4.0", only: :test},
-      {:execjs, "~> 1.2",
+      {:execjs, "~> 2.0.0",
        github: "devinus/execjs", sha: "a1c0af4c3b0afc9d6f176bf82f9c5b9fae3f2a45", only: :test},
-      {:poison, "~> 3.0"},
+      {:poison, ">= 3.0.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
