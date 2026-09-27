@@ -1,107 +1,34 @@
 defmodule PhoenixJsroutes.UrlTransformer do
-  def to_js(path) do
-    result = %{ index: 0, length: String.length(path), path: path, state: "start_path", code: "" }
-    do_recur(result).code
+  @moduledoc false
+
+  @doc """
+  Transforms a Phoenix route path into a JavaScript template-literal expression.
+  """
+  def to_js(path) when is_binary(path) do
+    chunks = transform(path, [])
+    IO.iodata_to_binary(["`", Enum.reverse(chunks), "`"])
   end
 
-  defp consume(%{index: index} = result) do
-    result |> Map.put(:index, index + 1)
+  defp transform("", acc), do: acc
+
+  defp transform(<<":", rest::binary>>, acc) do
+    {var, rest} = take_var(rest, [])
+    transform(rest, [["${", Enum.reverse(var), "}"] | acc])
   end
 
-  defp move_state(result, name) do
-    Map.put(result, :state, name)
+  defp transform(<<char::utf8, rest::binary>>, acc) do
+    transform(rest, [escape_static(<<char::utf8>>) | acc])
   end
 
-  defp current_char(result) do
-    result.path |> String.at(result.index)
+  defp take_var(<<>>, var), do: {var, ""}
+  defp take_var(<<"/", _::binary>> = rest, var), do: {var, rest}
+
+  defp take_var(<<char::utf8, rest::binary>>, var) do
+    take_var(rest, [<<char::utf8>> | var])
   end
 
-  defp do_recur(%{index: index, length: length} = result) when index == length do
-    end_path(result)
-  end
-
-  defp do_recur(result) do
-    result = invoke_state(result)
-    do_recur(result)
-  end
-
-  defp invoke_state(result) do
-    case result do
-      %{state: "start_path"} -> start_path(result)
-      %{state: "start_string"} -> start_string(result)
-      %{state: "end_string"} -> end_string(result)
-      %{state: "append_string"} -> append_string(result)
-      %{state: "start_var"} -> start_var(result)
-      %{state: "end_var"} -> end_var(result)
-      %{state: "append_var"} -> append_var(result)
-    end
-  end
-
-  # states
-
-  defp start_path(result) do
-    char = current_char(result)
-
-    if char == ":" do
-      result |> consume |> move_state("append_var")
-    else
-      result |> move_state("start_string")
-    end
-  end
-
-  defp start_string(result) do
-    result
-    |> Map.update!(:code, &(&1 <> "'"))
-    |> move_state("append_string")
-  end
-
-  defp end_string(result) do
-    result
-    |> Map.update!(:code, &(&1 <> "'"))
-    |> move_state("start_var")
-  end
-
-  defp append_string(result) do
-    char = current_char(result)
-
-    result = consume(result)
-
-    if char == ":" do
-      result |> move_state("end_string")
-    else
-      result |> Map.update!(:code, &(&1 <> char))
-    end
-  end
-
-  defp start_var(result) do
-    result
-    |> Map.update!(:code, &(&1 <> " + "))
-    |> move_state("append_var")
-  end
-
-  defp end_var(result) do
-    result
-    |> Map.update!(:code, &(&1 <> " + "))
-    |> move_state("start_string")
-  end
-
-  defp append_var(result) do
-    char = current_char(result)
-
-    if char == "/" do
-      result |> move_state("end_var")
-    else
-      result
-      |> consume
-      |> Map.update!(:code, &(&1 <> char))
-    end
-  end
-
-  defp end_path(%{state: "append_string"} = result) do
-    result |> end_string
-  end
-
-  defp end_path(result) do
-    result
-  end
+  defp escape_static("\\"), do: "\\\\"
+  defp escape_static("`"), do: "\\`"
+  defp escape_static("$"), do: "\\$"
+  defp escape_static(char), do: char
 end

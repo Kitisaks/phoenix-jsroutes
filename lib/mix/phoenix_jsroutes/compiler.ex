@@ -65,12 +65,12 @@ defmodule Mix.Compilers.Phoenix.JsRoutes do
       # New entries are the ones in the stale array
       new? = fn {module, _, _} -> Enum.any?(stale, &(elem(&1, 0) == module)) end
 
-      entries = (entries -- entries_to_remove) |> Enum.filter(&(!new?.(&1)))
+      entries = Enum.filter(entries -- entries_to_remove, &(!new?.(&1)))
 
       entries =
         entries ++
           Enum.map(stale, fn {module, dest} ->
-            {module, module.module_info[:md5], dest}
+            {module, module.module_info(:md5), dest}
           end)
 
       write_manifest(manifest, :lists.usort(entries))
@@ -87,14 +87,15 @@ defmodule Mix.Compilers.Phoenix.JsRoutes do
   Cleans up compilation artifacts.
   """
   def clean(manifest) do
-    read_manifest(manifest)
+    manifest
+    |> read_manifest()
     |> Enum.each(fn {_, _, output} -> File.rm(output) end)
   end
 
   defp stale?(_, {nil, nil, nil}), do: true
 
   defp stale?(module, {_, hash, _}) do
-    module.module_info[:md5] != hash
+    module.module_info(:md5) != hash
   end
 
   defp output_changed?(dest, {_, _, manifest_dest}) do
@@ -111,7 +112,7 @@ defmodule Mix.Compilers.Phoenix.JsRoutes do
         []
 
       {:ok, content} ->
-        :erlang.binary_to_term(content) |> parse_manifest
+        content |> :erlang.binary_to_term() |> parse_manifest()
     end
   end
 
@@ -122,7 +123,7 @@ defmodule Mix.Compilers.Phoenix.JsRoutes do
   end
 
   defp write_manifest(manifest, entries) do
-    content = {@manifest_vsn, entries} |> :erlang.term_to_binary()
+    content = :erlang.term_to_binary({@manifest_vsn, entries})
     File.write(manifest, content)
   end
 

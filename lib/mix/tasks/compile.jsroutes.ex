@@ -1,8 +1,12 @@
 defmodule Mix.Tasks.Compile.Jsroutes do
+  @shortdoc "Generates helpers to access server paths via javascript"
+  @moduledoc false
   use Mix.Task
+
+  alias Mix.Compilers.Phoenix.JsRoutes
+
   require EEx
 
-  @shortdoc "Generates helpers to access server paths via javascript"
   @manifest ".compile.jsroutes"
 
   @default_out_folder "assets/js"
@@ -18,7 +22,7 @@ defmodule Mix.Tasks.Compile.Jsroutes do
     file = Path.join(output_folder, @default_out_file)
     mappings = [{module, file}]
 
-    Mix.Compilers.Phoenix.JsRoutes.compile(manifest(), mappings, task_opts[:force], fn
+    JsRoutes.compile(manifest(), mappings, task_opts[:force], fn
       module, output ->
         routes = routes(module, app_env)
         File.mkdir_p(Path.dirname(output))
@@ -30,7 +34,7 @@ defmodule Mix.Tasks.Compile.Jsroutes do
   Cleans up compilation artifacts.
   """
   def clean do
-    Mix.Compilers.Phoenix.JsRoutes.clean(manifest())
+    JsRoutes.clean(manifest())
   end
 
   defp manifest, do: Path.join(Mix.Project.manifest_path(), @manifest)
@@ -51,7 +55,7 @@ defmodule Mix.Tasks.Compile.Jsroutes do
           Module.concat(base(app), "Router")
       end
 
-    unless Code.ensure_loaded?(module) do
+    if !Code.ensure_loaded?(module) do
       raise_module_not_found(module)
     end
 
@@ -60,17 +64,17 @@ defmodule Mix.Tasks.Compile.Jsroutes do
 
   defp base(app) do
     case Application.get_env(app, :namespace, app) do
-      ^app -> "#{to_string(app)}_web" |> Macro.camelize()
-      mod -> mod |> inspect
+      ^app -> Macro.camelize("#{to_string(app)}_web")
+      mod -> inspect(mod)
     end
   end
 
   defp routes(router, config) do
-    unless router.__routes__ do
+    if !function_exported?(router, :__routes__, 0) do
       raise_invalid_router(router)
     end
 
-    Enum.filter(router.__routes__, fn route ->
+    Enum.filter(router.__routes__(), fn route ->
       route_has_helper?(route) && match_filters?(route, config)
     end)
   end

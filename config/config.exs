@@ -14,7 +14,7 @@ config :phoenix_jsroutes, module: PhoenixJsroutes
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:phoenix_jsrouter, :key)
+#     Application.get_env(:phoenix_jsroutes, :key)
 #
 # Or configure a 3rd-party app:
 #
@@ -28,5 +28,3 @@ config :phoenix_jsroutes, module: PhoenixJsroutes
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
-#
-config :execjs, runtime: Execjs.Runtimes.Node

@@ -96,14 +96,14 @@ changes to take effect.
 
 Key | Type | Default | Description  |
 | --- | --- | --- | --- |
-output_folder | String | assets/static/js | Sets the folder used to generate files
+output_folder | String | assets/js | Sets the folder used to generate files
 include | Regex | nil | Will include only routes matching this regex
 exclude | Regex | nil | Will include only routes not matching this regex
 
 Configurations should be added to the key ```:jsroutes``` in your application.
 ```elixir
 config :my_app, :jsroutes,
-  output_folder: "assets/static/js",
+  output_folder: "assets/js",
   include: ~r[/api],
   exclude: ~r[/admin]
 ```

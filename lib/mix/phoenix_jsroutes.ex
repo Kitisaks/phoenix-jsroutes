@@ -1,10 +1,11 @@
 defmodule PhoenixJsroutes do
+  @moduledoc false
   def function_name(%{helper: helper, opts: opts}) do
-    "#{helper}_#{opts}" |> Macro.camelize() |> downcase_first
+    "#{helper}_#{opts}" |> Macro.camelize() |> downcase_first()
   end
 
   def function_name(%{helper: helper, plug_opts: opts}) do
-    "#{helper}_#{opts}" |> Macro.camelize() |> downcase_first
+    "#{helper}_#{opts}" |> Macro.camelize() |> downcase_first()
   end
 
   defp downcase_first(<<first::utf8, rest::binary>>) do
@@ -12,7 +13,8 @@ defmodule PhoenixJsroutes do
   end
 
   def function_params(%{path: path}) do
-    String.split(path, "/")
+    path
+    |> String.split("/")
     |> Enum.filter(&String.starts_with?(&1, ":"))
     |> Enum.join(", ")
     |> String.replace(":", "")

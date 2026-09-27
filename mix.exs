@@ -1,11 +1,11 @@
-defmodule PhoenixJsroutes.Mixfile do
+defmodule PhoenixJsroutes.MixProject do
   use Mix.Project
 
   def project do
     [
       app: :phoenix_jsroutes,
       version: "2.0.0",
-      elixir: "~> 1.4",
+      elixir: "~> 1.14",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
@@ -15,16 +15,14 @@ defmodule PhoenixJsroutes.Mixfile do
   end
 
   def application do
-    [applications: [:logger]]
+    [extra_applications: [:logger]]
   end
 
   defp deps do
     [
-      {:phoenix, ">= 1.4.0", only: :test},
-      {:execjs, "~> 2.0.0",
-       github: "devinus/execjs", sha: "a1c0af4c3b0afc9d6f176bf82f9c5b9fae3f2a45", only: :test},
-      {:poison, ">= 3.0.0"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:phoenix, "~> 1.8", only: :test},
+      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
+      {:styler, "~> 1.12", only: [:dev, :test], runtime: false}
     ]
   end
 

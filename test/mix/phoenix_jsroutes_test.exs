@@ -1,8 +1,9 @@
 defmodule PhoenixJsroutesTest do
   use ExUnit.Case
-  doctest PhoenixJsroutes
 
   import PhoenixJsroutes
+
+  doctest PhoenixJsroutes
 
   test "function_name returns the camelized js function name" do
     assert function_name(%{helper: "user", opts: :create}) == "userCreate"
@@ -18,10 +19,10 @@ defmodule PhoenixJsroutesTest do
   end
 
   test "function_body returns a valid javascript expression with an url" do
-    assert function_body(%{path: "/users"}) == "'/users'"
-    assert function_body(%{path: "/users/:id"}) == "'/users/' + id"
-    assert function_body(%{path: "/users/:foo/:bar"}) == "'/users/' + foo + '/' + bar"
-    assert function_body(%{path: "/users/:user_id/friends"}) == "'/users/' + user_id + '/friends'"
-    assert function_body(%{path: "/users/:user_id/friends/:id"}) == "'/users/' + user_id + '/friends/' + id"
+    assert function_body(%{path: "/users"}) == "`/users`"
+    assert function_body(%{path: "/users/:id"}) == "`/users/${id}`"
+    assert function_body(%{path: "/users/:foo/:bar"}) == "`/users/${foo}/${bar}`"
+    assert function_body(%{path: "/users/:user_id/friends"}) == "`/users/${user_id}/friends`"
+    assert function_body(%{path: "/users/:user_id/friends/:id"}) == "`/users/${user_id}/friends/${id}`"
   end
 end
